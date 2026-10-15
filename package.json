@@ -1,0 +1,39 @@
+{
+<<<<<<< HEAD
+  "dependencies": {
+    "three": "^0.183.2",
+    "three-mediapipe-rig": "^0.1.41"
+  }
+}
+=======
+  "name": "manager-teams-bot",
+  "version": "1.0.0",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/index",
+  "types": "dist/index",
+  "scripts": {
+    "clean": "npx rimraf ./dist",
+    "build": "npx tsup",
+    "start": "node .",
+    "dev": "tsx watch -r dotenv/config src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@microsoft/teams.api": "^2.0.15",
+    "@microsoft/teams.apps": "^2.0.15",
+    "@types/express": "^5.0.6",
+    "botbuilder": "^4.23.3",
+    "express": "^5.2.1",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "dotenv": "^16.6.1",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.4.0",
+    "tsx": "^4.20.6",
+    "typescript": "^5.4.5"
+  }
+}
+>>>>>>> 5044f51294259538fe9cd850bb5959d281df0636

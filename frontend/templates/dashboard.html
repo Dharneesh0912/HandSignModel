@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Translator — Sign Translator</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}"/>
+</head>
+<body>
+
+  <!-- ============ NAVBAR ============ -->
+  <header class="dash-nav">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='img/logo-icon-128.png') }}"
+           alt="Sign Translator logo" class="logo-img"/>
+      Sign Translator
+    </div>
+
+    <!-- Mode switcher -->
+    <div class="mode-switcher" id="modeSwitcher">
+      <span class="mode-pill" id="modePill"></span>
+      <button class="mode-btn active" data-mode="sign-to-text">Sign to Text</button>
+      <button class="mode-btn" data-mode="text-to-sign">Text to Sign</button>
+    </div>
+
+    <div class="nav-right">
+      <span class="greeting">Signed in as <strong>{{ user_name }}</strong></span>
+      <a href="/logout" class="btn-outline">Logout</a>
+    </div>
+  </header>
+
+  <!-- ============ SIGN → TEXT MODE ============ -->
+  <div class="mode-view active" id="view-sign-to-text">
+    <main class="dash-main">
+
+      <section class="video-panel">
+        <span class="hud-corner tl"></span>
+        <span class="hud-corner tr"></span>
+        <span class="hud-corner bl"></span>
+        <span class="hud-corner br"></span>
+        <span class="scan-line"></span>
+
+        <video id="video" autoplay muted playsinline></video>
+        <canvas id="overlay"></canvas>
+
+        <div id="letterPopup" class="letter-popup"></div>
+
+        <!-- ===== HOLD RING ===== -->
+        <div id="progressRing" class="progress-ring">
+          <svg viewBox="0 0 120 120" class="ring-svg">
+            <defs>
+              <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   stop-color="#ffffff"/>
+                <stop offset="100%" stop-color="#a8d5b5"/>
+              </linearGradient>
+            </defs>
+            <circle class="ring-bg"    cx="60" cy="60" r="52"></circle>
+            <circle class="ring-fg"    cx="60" cy="60" r="52"></circle>
+            <circle class="ring-pulse" cx="60" cy="60" r="52"></circle>
+          </svg>
+          <div class="ring-center">
+            <span class="ring-countdown" id="ringCountdown">1.4</span>
+            <span class="ring-label" id="ringLabel">HOLD</span>
+          </div>
+        </div>
+
+        <div id="status" class="status">
+          <span class="waveform">
+            <span></span><span></span><span></span><span></span><span></span>
+          </span>
+          <span id="statusText">Show your hand</span>
+        </div>
+
+        <div class="stats-bar">
+          <span id="fps">0 FPS</span>
+          <span id="conf">--%</span>
+          <span id="handed">--</span>
+        </div>
+      </section>
+
+      <section class="sentence-panel spotlight-card">
+        <div class="panel-header">
+          <h2>Your Sentence</h2>
+          <span id="letterCount" class="badge">0 letters</span>
+        </div>
+
+        <div class="live-counter">
+          <span>Letters <b id="statLetters">0</b></span>
+          <span>Words <b id="statWords">0</b></span>
+          <span>Sentences <b id="statSentences">0</b></span>
+        </div>
+
+        <div id="sentence" class="sentence-box" data-empty="true">
+          <div class="empty-state">
+            <div class="empty-illustration">
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 11V6a2 2 0 0 1 4 0v5" />
+                <path d="M10 6V4a2 2 0 0 1 4 0v7" />
+                <path d="M14 6a2 2 0 0 1 4 0v6" />
+                <path d="M18 9a2 2 0 0 1 4 0v6a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8v-2" />
+              </svg>
+            </div>
+            <span class="empty-text">Start signing...</span>
+          </div>
+          <span id="sentenceText" class="sentence-text"></span>
+        </div>
+
+        <div class="recent-strip hidden" id="recentStrip">
+          <span class="label">Recent</span>
+          <div class="recent-chips" id="recentChips"></div>
+        </div>
+
+        <div id="guidance" class="guidance-card hidden">
+          <div class="guidance-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 18h6"/>
+              <path d="M10 22h4"/>
+              <path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1v.2h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/>
+            </svg>
+          </div>
+          <div>
+            <h4 id="guideReason">Reason</h4>
+            <p id="guideFix">Fix suggestion</p>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button id="speakBtn" title="Speak sentence">
+            <svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+            Speak
+          </button>
+          <button id="spaceBtn" title="Add space">
+            <svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="9" x2="4" y2="15"/><line x1="20" y1="9" x2="20" y2="15"/></svg>
+            Space
+          </button>
+          <button id="undoBtn" title="Undo last letter (Ctrl+Z)" disabled>
+            <svg viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7"/></svg>
+            Undo
+          </button>
+          <button id="clearBtn" title="Clear sentence">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+            Clear
+          </button>
+          <button id="copyBtn" title="Copy to clipboard">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copy
+          </button>
+          <button id="saveBtn" title="Save sentence">
+            <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save
+          </button>
+        </div>
+
+        <div class="session-stats">
+          <div class="session-stat">
+            <span class="num" id="sessionLetters">0</span>
+            <span class="lbl">Letters signed</span>
+          </div>
+          <div class="session-stat">
+            <span class="num" id="sessionAccuracy">--%</span>
+            <span class="lbl">Avg confidence</span>
+          </div>
+          <div class="session-stat">
+            <span class="num" id="sessionSaved">0</span>
+            <span class="lbl">Saved today</span>
+          </div>
+        </div>
+
+        <div class="toggle-row">
+          <label class="switch">
+            <input type="checkbox" id="autoVoice">
+            <span class="slider"></span>
+          </label>
+          <span>Auto-speak letters</span>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ============ TEXT → SIGN MODE ============ -->
+  <div class="mode-view" id="view-text-to-sign" hidden>
+    <main class="dash-main tts-main">
+
+      <!-- LEFT: 2D skeleton stage -->
+      <section class="video-panel tts-stage-panel" id="ttsStage">
+        <span class="hud-corner tl"></span>
+        <span class="hud-corner tr"></span>
+        <span class="hud-corner bl"></span>
+        <span class="hud-corner br"></span>
+        <span class="scan-line"></span>
+
+        <div id="ttsStageCaption" class="tts-stage-caption">Ready</div>
+        <div id="ttsStageLetter" class="tts-stage-letter"></div>
+
+        <div class="tts-progress-track">
+          <div id="ttsProgressBar" class="tts-progress-fill"></div>
+        </div>
+      </section>
+
+      <!-- RIGHT: Controls -->
+      <section class="sentence-panel spotlight-card tts-controls-panel">
+
+        <div class="panel-header">
+          <h2>Text to Sign</h2>
+          <span class="badge" id="ttsCharCount">0/200</span>
+        </div>
+
+        <div class="tts-input-wrap">
+          <textarea
+            id="ttsInput"
+            class="tts-input"
+            placeholder="Type a word or sentence… e.g. HELLO WORLD"
+            maxlength="200"
+            rows="3"
+          ></textarea>
+
+          <div class="tts-input-actions">
+            <button id="ttsConvertBtn" class="tts-btn tts-btn-primary">
+              <svg viewBox="0 0 24 24"><polyline points="4 7 12 13 20 7"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+              Convert
+            </button>
+            <button id="ttsClearBtn" class="tts-btn tts-btn-ghost">
+              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <div class="tts-playback">
+          <button id="ttsPrevBtn" class="tts-icon-btn" title="Previous">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+          <button id="ttsPlayBtn" class="tts-icon-btn tts-icon-primary" title="Play">
+            <svg viewBox="0 0 24 24"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+          </button>
+          <button id="ttsPauseBtn" class="tts-icon-btn" title="Pause" disabled>
+            <svg viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          </button>
+          <button id="ttsNextBtn" class="tts-icon-btn" title="Next">
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+
+          <div class="tts-speed">
+            <label for="ttsSpeed">Speed</label>
+            <input type="range" id="ttsSpeed" min="400" max="2000" step="100" value="900"/>
+            <span id="ttsSpeedLabel" class="tts-speed-label">1.1/s</span>
+          </div>
+        </div>
+
+        <!-- ▼ VOICE TOGGLE ▼ -->
+        <div class="tts-voice-row">
+          <label class="switch">
+            <input type="checkbox" id="ttsVoiceToggle" checked>
+            <span class="slider"></span>
+          </label>
+          <span class="tts-voice-label">🔊 Speak each letter</span>
+        </div>
+
+        <div class="tts-strip-wrap">
+          <div class="tts-strip-label">Sequence</div>
+          <div id="ttsSequenceStrip" class="tts-strip"></div>
+          <div id="ttsEmptyMsg" class="tts-empty">Type text above and press Convert.</div>
+        </div>
+
+        <div class="session-stats">
+          <div class="session-stat">
+            <span class="num" id="ttsStatTotal">0</span>
+            <span class="lbl">Total signs</span>
+          </div>
+          <div class="session-stat">
+            <span class="num" id="ttsStatUnique">0</span>
+            <span class="lbl">Unique signs</span>
+          </div>
+          <div class="session-stat">
+            <span class="num" id="ttsStatSpeed">1.1/s</span>
+            <span class="lbl">Playback speed</span>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- ============ SCRIPTS ============ -->
+  <script src="{{ url_for('static', filename='js/translator.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/ai-background.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dashboard-effects.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/sentence-features.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/mode-switcher.js') }}"></script>
+  <script type="module" src="{{ url_for('static', filename='js/text-to-sign.js') }}"></script>
+</body>
+</html>

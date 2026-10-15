@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Translator — Sign Translator</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon.png') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+</head>
+<body class="landing-body">
+
+  <!-- ============ NAVBAR ============ -->
+  <nav class="navbar">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='img/logo-icon-128.png') }}"
+          alt="Sign Translator logo" class="logo-img"/>
+      Sign Translator
+    </div>
+    <div class="nav-links">
+      <a href="/login" class="btn-outline">Login</a>
+      <a href="/signup" class="btn-primary">Get Started</a>
+    </div>
+  </nav>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="hero-text">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        Real-time ASL Recognition
+      </div>
+      <h1>Turn <span class="gradient-text">Sign Language</span><br>into Words.</h1>
+      <p>Empowering the deaf community with real-time ASL recognition — no voice needed. Just sign, and we'll do the talking.</p>
+      <div class="hero-buttons">
+        <a href="/signup" class="btn-primary big">Try It Free →</a>
+        <a href="#how" class="btn-ghost big">How It Works</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <h4>28</h4>
+          <p>Signs supported</p>
+        </div>
+        <div class="stat">
+          <h4>&lt;100ms</h4>
+          <p>Inference speed</p>
+        </div>
+        <div class="stat">
+          <h4>98%</h4>
+          <p>Model accuracy</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product preview card -->
+    <div class="hero-visual">
+      <div class="preview-card">
+        <div class="preview-header">
+          <span class="preview-live">Live</span>
+          <span class="preview-label">SignSpeak Camera</span>
+        </div>
+
+        <div class="preview-frame">
+          <span class="frame-corner tl"></span>
+          <span class="frame-corner tr"></span>
+          <span class="frame-corner bl"></span>
+          <span class="frame-corner br"></span>
+
+          <!-- Hand SVG — ASL "A" pose (black & white theme) -->
+          <svg class="hand-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M28 62 Q26 42 34 34 Q42 26 50 30 Q58 26 66 34 Q74 42 72 62 Q70 78 50 82 Q30 78 28 62 Z"
+                  fill="url(#handGrad)" stroke="rgba(255,255,255,0.5)" stroke-width="1.5"/>
+            <path d="M34 40 Q34 30 38 26" stroke="url(#handGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+            <path d="M44 36 Q44 26 47 22" stroke="url(#handGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+            <path d="M54 36 Q54 26 57 22" stroke="url(#handGrad)" stroke-width="7" stroke-linecap="round" fill="none"/>
+            <path d="M30 55 Q22 52 20 46 Q19 42 24 42" stroke="url(#handGrad)" stroke-width="8" stroke-linecap="round" fill="none"/>
+            <defs>
+              <linearGradient id="handGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%"   stop-color="#ffffff"/>
+                <stop offset="55%"  stop-color="#d4d4d4"/>
+                <stop offset="100%" stop-color="#a0a0a0"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <div class="preview-prediction">
+          <span class="preview-pred-label">Detected</span>
+          <span id="predLetter" class="preview-pred-letter">A</span>
+        </div>
+
+        <div class="preview-confidence">
+          <div class="conf-track">
+            <div id="predBar" class="conf-fill"></div>
+          </div>
+          <span id="predValue" class="conf-value">94%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FEATURES ============ -->
+  <section id="how" class="features">
+    <h2>How It Works</h2>
+    <p class="subtitle">Three simple steps to convert your signs into spoken words.</p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M6 11V6a2 2 0 0 1 4 0v5"/>
+            <path d="M10 6V4a2 2 0 0 1 4 0v7"/>
+            <path d="M14 6a2 2 0 0 1 4 0v6"/>
+            <path d="M18 9a2 2 0 0 1 4 0v6a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8v-2"/>
+          </svg>
+        </div>
+        <h3>Show Your Hand</h3>
+        <p>Simply show an ASL alphabet sign to your webcam. Our model tracks 21 hand landmarks in real time.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v3"/>
+            <path d="M12 19v3"/>
+            <path d="M4.22 4.22l2.12 2.12"/>
+            <path d="M17.66 17.66l2.12 2.12"/>
+            <path d="M2 12h3"/>
+            <path d="M19 12h3"/>
+            <path d="M4.22 19.78l2.12-2.12"/>
+            <path d="M17.66 6.34l2.12-2.12"/>
+          </svg>
+        </div>
+        <h3>AI Recognizes</h3>
+        <p>An ensemble ML model classifies 28 signs — A to Z, Space, and Clear — with high confidence.</p>
+      </div>
+
+      <div class="feature-card">
+        <div class="icon">
+          <svg viewBox="0 0 24 24">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+            <path d="M15.5 8.5a5 5 0 0 1 0 7"/>
+            <path d="M18.5 5.5a9 9 0 0 1 0 13"/>
+          </svg>
+        </div>
+        <h3>Build Sentences</h3>
+        <p>Letters are assembled into full sentences with optional voice output and save history.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 SignSpeak — Built for Accessibility</p>
+  </footer>
+
+  <!-- Hero prediction cycling -->
+  <script>
+    (function () {
+      const letters = ['A', 'B', 'C', 'D', 'E', 'L', 'V', 'Y'];
+      const letterEl = document.getElementById('predLetter');
+      const barEl    = document.getElementById('predBar');
+      const valueEl  = document.getElementById('predValue');
+      if (!letterEl) return;
+      let i = 0;
+      function cycle() {
+        const letter = letters[i % letters.length];
+        const conf = 88 + Math.floor(Math.random() * 12);
+        letterEl.textContent = letter;
+        letterEl.classList.remove('flip');
+        void letterEl.offsetWidth;
+        letterEl.classList.add('flip');
+        barEl.style.width = conf + '%';
+        valueEl.textContent = conf + '%';
+        i++;
+      }
+      cycle();
+      setInterval(cycle, 2200);
+    })();
+  </script>
+
+  <!-- AI background -->
+  <script src="{{ url_for('static', filename='js/ai-background.js') }}"></script>
+
+</body>
+</html>
